@@ -12,10 +12,12 @@ namespace OrderMicroService.Controllers
     public class OrderController : Controller
     {
         private readonly IOrderService _orderService;
+        private readonly MessageProducer _messageProducer;
 
-        public OrderController(IOrderService orderService)
+        public OrderController(IOrderService orderService, MessageProducer messageProducer)
         { 
             _orderService = orderService;
+            _messageProducer = messageProducer;
         }
 
         [HttpGet("getUserOrders/{userId}")]

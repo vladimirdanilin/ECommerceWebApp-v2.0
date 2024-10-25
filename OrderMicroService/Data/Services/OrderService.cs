@@ -1,6 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using OrderMicroService.Data.DTOs;
 using OrderMicroService.Data.Models;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Threading.RateLimiting;
 
 namespace OrderMicroService.Data.Services
@@ -11,13 +13,15 @@ namespace OrderMicroService.Data.Services
         private readonly HttpClient _shoppingCartClient;
         private readonly HttpClient _profileClient;
         private readonly HttpClient _productClient;
+        private readonly MessageProducer _messageProducer;
 
-        public OrderService(AppDbContext context, IHttpClientFactory httpClientFactory)
+        public OrderService(AppDbContext context, IHttpClientFactory httpClientFactory, MessageProducer messageProducer)
         {
             _context = context;
             _shoppingCartClient = httpClientFactory.CreateClient("ShoppingCartMicroService");
             _profileClient = httpClientFactory.CreateClient("ProfileMicroService");
             _productClient = httpClientFactory.CreateClient("ProductMicroService");
+            _messageProducer = messageProducer;
         }
 
         public async Task<IEnumerable<Order>> GetOrdersByUserIdAsync(int userId)
@@ -93,7 +97,17 @@ namespace OrderMicroService.Data.Services
 
             foreach (var item in shoppingCartDTO.CartItemDTOs)
             {
-                await _productClient.PutAsJsonAsync($"Product/decreaseProductQuantity/{item.ProductId}", item.Quantity);
+                //await _productClient.PutAsJsonAsync($"Product/decreaseProductQuantity/{item.ProductId}", item.Quantity);
+
+                var message = new
+                {
+                    item.ProductId,
+                    item.Quantity
+                };
+
+                var jsonMessage = JsonSerializer.Serialize(message);
+
+                _messageProducer.SendMessage(jsonMessage, "decrease_product_quantity_queue");
             }
 
             await _shoppingCartClient.DeleteAsync($"ShoppingCart/clear/{userId}");

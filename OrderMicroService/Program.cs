@@ -10,6 +10,7 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 
 //Configure Services
 builder.Services.AddScoped<IOrderService, OrderService>();
+builder.Services.AddSingleton<MessageProducer>();
 
 //Configure HttpClient
 builder.Services.AddHttpClient("ShoppingCartMicroService", client =>

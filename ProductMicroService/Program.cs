@@ -15,6 +15,9 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddScoped<IInventoryService, InventoryService>();
 
+//Configure hosted services
+builder.Services.AddHostedService<ConsumerService>();
+
 // Add services to the container.
 
 builder.Services.AddControllers();
