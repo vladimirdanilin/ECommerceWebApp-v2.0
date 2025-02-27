@@ -10,9 +10,17 @@ using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+
+var password = Environment.GetEnvironmentVariable("POSTGRES_PASSWORD");
+if (!string.IsNullOrEmpty(password))
+{
+    connectionString = connectionString.Replace("Password=", $"Password={password}");
+}
+
 //Configure connection to PostgreSQL
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+    options.UseNpgsql(connectionString));
 
 //Configure Services
 builder.Services.AddScoped<IAuthService, AuthService>();

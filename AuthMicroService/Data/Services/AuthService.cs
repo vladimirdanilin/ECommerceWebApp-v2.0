@@ -36,7 +36,7 @@ namespace AuthMicroService.Data.Services
 
             var result = await _userManager.CreateAsync(user, registerModel.Password);
 
-            if (result.Succeeded)
+             if (result.Succeeded)
             {
                 await _userManager.AddToRoleAsync(user, Roles.Customer);
                 return true;

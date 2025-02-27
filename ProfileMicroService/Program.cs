@@ -4,9 +4,17 @@ using ProfileMicroService.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
+string connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+
+var password = Environment.GetEnvironmentVariable("POSTGRES_PASSWORD");
+if (!string.IsNullOrEmpty(password))
+{
+    connectionString = connectionString.Replace("Password=", $"Password={password}");
+}
+
 //Configure Connection To PostgreSQL
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+    options.UseNpgsql(connectionString));
 
 //Services Configuration
 builder.Services.AddScoped<IAddressService, AddressService>();
