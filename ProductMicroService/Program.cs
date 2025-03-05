@@ -94,6 +94,8 @@ builder.Services.AddSwaggerGen(c =>
 
 var app = builder.Build();
 
+app.MapGrpcService<ProductGrpcServerService>();
+
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
