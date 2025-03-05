@@ -1,5 +1,4 @@
 ﻿using Microsoft.EntityFrameworkCore.Metadata;
-using ProductMicroService.Data.Services;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using System.Text;
@@ -7,7 +6,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading.Channels;
 
-namespace ProductMicroService
+namespace ProductMicroService.Data.Services
 {
     public class ConsumerService : BackgroundService
     {
@@ -78,7 +77,7 @@ namespace ProductMicroService
         }
 
         public override void Dispose()
-        { 
+        {
             _channel?.Close();
             _channel?.Dispose();
             base.Dispose();

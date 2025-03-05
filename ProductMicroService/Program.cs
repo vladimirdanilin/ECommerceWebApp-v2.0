@@ -19,6 +19,8 @@ if (!string.IsNullOrEmpty(password))
 builder.Services.AddDbContext<AppDbContext>(options => 
     options.UseNpgsql(connectionString));
 
+builder.Services.AddGrpc();
+
 //Configure Services
 builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddScoped<IInventoryService, InventoryService>();
