@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+option csharp_namespace = "ProductMicroService";
+
+service ProductGrpcService {
+	rpc CheckProductAvailability (ProductRequest) returns (ProductResponse);
+}
+
+message ProductRequest{
+	string productId = 1;
+	int32 requestedQuantity = 2;
+}
+
+message ProductResponse{
+	bool isAvailable = 1;
+	double currentPrice = 2;
+}

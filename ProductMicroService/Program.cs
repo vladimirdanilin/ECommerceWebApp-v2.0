@@ -19,6 +19,8 @@ if (!string.IsNullOrEmpty(password))
 builder.Services.AddDbContext<AppDbContext>(options => 
     options.UseNpgsql(connectionString));
 
+builder.Services.AddGrpc();
+
 //Configure Services
 builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddScoped<IInventoryService, InventoryService>();
@@ -91,6 +93,8 @@ builder.Services.AddSwaggerGen(c =>
 });
 
 var app = builder.Build();
+
+app.MapGrpcService<ProductGrpcServerService>();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

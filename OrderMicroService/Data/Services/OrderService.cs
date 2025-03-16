@@ -14,14 +14,16 @@ namespace OrderMicroService.Data.Services
         private readonly HttpClient _profileClient;
         private readonly HttpClient _productClient;
         private readonly MessageProducer _messageProducer;
+        private readonly ProductGrpcClientService _productGrpcClientService;
 
-        public OrderService(AppDbContext context, IHttpClientFactory httpClientFactory, MessageProducer messageProducer)
+        public OrderService(AppDbContext context, IHttpClientFactory httpClientFactory, MessageProducer messageProducer, ProductGrpcClientService productGrpcClientService)
         {
             _context = context;
             _shoppingCartClient = httpClientFactory.CreateClient("ShoppingCartMicroService");
             _profileClient = httpClientFactory.CreateClient("ProfileMicroService");
             _productClient = httpClientFactory.CreateClient("ProductMicroService");
             _messageProducer = messageProducer;
+            _productGrpcClientService = productGrpcClientService;
         }
 
         public async Task<IEnumerable<Order>> GetOrdersByUserIdAsync(int userId)
@@ -52,7 +54,7 @@ namespace OrderMicroService.Data.Services
 
             var shoppingCartDTO = await cartResponse.Content.ReadFromJsonAsync<ShoppingCartDTO>();
 
-            foreach (var item in shoppingCartDTO.CartItemDTOs)
+            /*foreach (var item in shoppingCartDTO.CartItemDTOs)
             {
                 var productResponse = await _productClient.GetAsync($"Product/getProductQuantity/{item.ProductId}");
 
@@ -67,6 +69,18 @@ namespace OrderMicroService.Data.Services
                 {
                     throw new Exception("Not Enough Products In Stock");
                 }
+            }*/
+
+            foreach (var item in shoppingCartDTO.CartItemDTOs)
+            {
+                var quantityPriceResponse = await _productGrpcClientService.CheckProductAvailability(item.ProductId, item.Quantity);
+
+                if (quantityPriceResponse.IsAvailable == false)
+                {
+                    throw new Exception("Product Is Not Available");
+                }
+
+                item.TotalUnitPrice = (decimal)quantityPriceResponse.CurrentPrice * item.Quantity;
             }
 
             var addressResponse = await _profileClient.GetAsync($"Profile/getDefaultAddressId/{userId}");
