@@ -24,7 +24,8 @@ namespace ProductMicroService.Migrations
                     TotalNumberOfStars = table.Column<int>(type: "integer", nullable: false),
                     TotalNumberOfRates = table.Column<int>(type: "integer", nullable: false),
                     Quantity = table.Column<int>(type: "integer", nullable: false),
-                    ProductCategory = table.Column<int>(type: "integer", nullable: false)
+                    ProductCategory = table.Column<int>(type: "integer", nullable: false),
+                    AvailableForSale = table.Column<bool>(type: "boolean", nullable: false)
                 },
                 constraints: table =>
                 {

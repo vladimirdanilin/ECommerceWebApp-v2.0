@@ -8,7 +8,7 @@ namespace OrderMicroService.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    //[Authorize]
+    [Authorize]
     public class OrderController : Controller
     {
         private readonly IOrderService _orderService;
@@ -39,8 +39,8 @@ namespace OrderMicroService.Controllers
         [HttpPost("placeOrder")]
         public async Task<IActionResult> PlaceOrderAndGetId()
         {
-            //int userId = int.Parse(User.Claims.First(c => c.Type == "userId").Value);
-            var orderId = await _orderService.PlaceOrderAndGetIdAsync(1);
+            int userId = int.Parse(User.Claims.First(c => c.Type == "userId").Value);
+            var orderId = await _orderService.PlaceOrderAndGetIdAsync(userId);
 
             return Ok(orderId);
         }

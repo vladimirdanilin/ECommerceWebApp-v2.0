@@ -11,8 +11,8 @@ using ProductMicroService;
 namespace ProductMicroService.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20240916094049_Initial2")]
-    partial class Initial2
+    [Migration("20250305140428_Initial")]
+    partial class Initial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
