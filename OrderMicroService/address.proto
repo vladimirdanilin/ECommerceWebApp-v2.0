@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+option csharp_namespace = "OrderMicroService";
+
+service AddressGrpcService {
+	rpc GetUserDefaultAddress (AddressRequest) returns (AddressResponse);
+}
+
+message AddressRequest{
+	int32 userId = 1;
+}
+
+message AddressResponse{
+	int32 addressId = 1;
+}

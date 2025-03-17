@@ -8,7 +8,7 @@ namespace OrderMicroService.Data.Services
 
         public ProductGrpcClientService()
         {
-            var channel = GrpcChannel.ForAddress("https://localhost:5001");
+            var channel = GrpcChannel.ForAddress("https://localhost:7103");
 
             _client = new ProductGrpcService.ProductGrpcServiceClient(channel);
         }

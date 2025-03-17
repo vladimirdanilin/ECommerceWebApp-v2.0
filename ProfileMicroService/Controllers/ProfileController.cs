@@ -7,7 +7,7 @@ namespace ProfileMicroService.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    //[Authorize]
+    [Authorize]
     public class ProfileController : Controller
     {
         private readonly IAddressService _addressService;

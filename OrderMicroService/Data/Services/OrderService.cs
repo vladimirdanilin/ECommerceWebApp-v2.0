@@ -15,8 +15,9 @@ namespace OrderMicroService.Data.Services
         private readonly HttpClient _productClient;
         private readonly MessageProducer _messageProducer;
         private readonly ProductGrpcClientService _productGrpcClientService;
+        private readonly AddressGrpcClientService _addressGrpcClientService;
 
-        public OrderService(AppDbContext context, IHttpClientFactory httpClientFactory, MessageProducer messageProducer, ProductGrpcClientService productGrpcClientService)
+        public OrderService(AppDbContext context, IHttpClientFactory httpClientFactory, MessageProducer messageProducer, ProductGrpcClientService productGrpcClientService, AddressGrpcClientService addressGrpcClientService)
         {
             _context = context;
             _shoppingCartClient = httpClientFactory.CreateClient("ShoppingCartMicroService");
@@ -24,6 +25,7 @@ namespace OrderMicroService.Data.Services
             _productClient = httpClientFactory.CreateClient("ProductMicroService");
             _messageProducer = messageProducer;
             _productGrpcClientService = productGrpcClientService;
+            _addressGrpcClientService = addressGrpcClientService;
         }
 
         public async Task<IEnumerable<Order>> GetOrdersByUserIdAsync(int userId)
@@ -54,23 +56,6 @@ namespace OrderMicroService.Data.Services
 
             var shoppingCartDTO = await cartResponse.Content.ReadFromJsonAsync<ShoppingCartDTO>();
 
-            /*foreach (var item in shoppingCartDTO.CartItemDTOs)
-            {
-                var productResponse = await _productClient.GetAsync($"Product/getProductQuantity/{item.ProductId}");
-
-                if (!productResponse.IsSuccessStatusCode)
-                {
-                    throw new Exception("Product NotFound");
-                }
-
-                var productQuantityInStock = await productResponse.Content.ReadFromJsonAsync<int>();
-
-                if (item.Quantity > productQuantityInStock)
-                {
-                    throw new Exception("Not Enough Products In Stock");
-                }
-            }*/
-
             foreach (var item in shoppingCartDTO.CartItemDTOs)
             {
                 var quantityPriceResponse = await _productGrpcClientService.CheckProductAvailability(item.ProductId, item.Quantity);
@@ -83,20 +68,13 @@ namespace OrderMicroService.Data.Services
                 item.TotalUnitPrice = (decimal)quantityPriceResponse.CurrentPrice * item.Quantity;
             }
 
-            var addressResponse = await _profileClient.GetAsync($"Profile/getDefaultAddressId/{userId}");
-
-            if (!addressResponse.IsSuccessStatusCode)
-            {
-                throw new Exception("Address Id Was Not Found");
-            }
-
-            var selectedAddressId = await addressResponse.Content.ReadFromJsonAsync<int>();
+            var defaultAddressResponse = await _addressGrpcClientService.GetUserDefaultAddress(userId);
 
             var order = new Order
             {
                 UserId = userId,
                 OrderDate = DateOnly.FromDateTime(DateTime.Now),
-                ShippingAddressId = selectedAddressId,
+                ShippingAddressId = defaultAddressResponse.AddressId,
                 Status = OrderStatus.Pending,
                 Total = shoppingCartDTO.CartItemDTOs.Sum(item => item.TotalUnitPrice),
                 OrdersProducts = shoppingCartDTO.CartItemDTOs.Select(cartItem => new OrderProduct

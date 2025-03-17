@@ -52,6 +52,7 @@ builder.Services.AddGrpcClient<ProductGrpcService.ProductGrpcServiceClient>(o =>
 });
 
 builder.Services.AddSingleton<ProductGrpcClientService>();
+builder.Services.AddSingleton<AddressGrpcClientService>();
 
 // Add services to the container.
 
