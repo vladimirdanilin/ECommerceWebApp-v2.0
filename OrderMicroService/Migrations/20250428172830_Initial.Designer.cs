@@ -12,7 +12,7 @@ using OrderMicroService;
 namespace OrderMicroService.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250305140316_Initial")]
+    [Migration("20250428172830_Initial")]
     partial class Initial
     {
         /// <inheritdoc />

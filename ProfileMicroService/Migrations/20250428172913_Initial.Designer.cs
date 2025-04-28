@@ -11,7 +11,7 @@ using ProfileMicroService;
 namespace ProfileMicroService.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20241006111640_Initial")]
+    [Migration("20250428172913_Initial")]
     partial class Initial
     {
         /// <inheritdoc />

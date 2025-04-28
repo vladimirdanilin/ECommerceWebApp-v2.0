@@ -11,7 +11,7 @@ using ShoppingCartMicroService;
 namespace ShoppingCartMicroService.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250305140512_Initial")]
+    [Migration("20250428172927_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
