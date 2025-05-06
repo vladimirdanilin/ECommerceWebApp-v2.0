@@ -159,6 +159,7 @@ namespace Tests
         [Fact]
         public async Task RegisterUser_ValidData_ReturnsTrue()
         {
+            //Arrange
             var mockUserStore = new Mock<IUserStore<User>>();
             var mockUserManager = new Mock<UserManager<User>>(mockUserStore.Object, null, null, null, null, null, null, null, null);
 
@@ -199,12 +200,155 @@ namespace Tests
                 ConfirmPassword = "Test123!"
             };
 
+            //Act
             var result = await authService.RegisterUser(registerModel);
 
+            //Assert
             Assert.True(result);
+        }
 
+        [Fact]
+        public async Task RegisterUser_InvalidData_ReturnsFalse()
+        {
+            //Arrange
+            var mockUserStore = new Mock<IUserStore<User>>();
+            var mockUserManager = new Mock<UserManager<User>>(mockUserStore.Object, null, null, null, null, null, null, null, null);
 
+            mockUserManager.Setup(x => x.NormalizeEmail(It.IsAny<string>()))
+                .Returns((string email) => email.ToUpperInvariant());
 
+            mockUserManager.Setup(x => x.CreateAsync(It.IsAny<User>(), It.IsAny<string>()))
+                .ReturnsAsync(IdentityResult.Failed());
+
+            mockUserManager.Setup(x => x.AddToRoleAsync(It.IsAny<User>(), It.IsAny<string>()))
+                .ReturnsAsync(IdentityResult.Success);
+
+            var mockHttpContextAccessor = new Mock<Microsoft.AspNetCore.Http.IHttpContextAccessor>();
+            var mockClaimsFactory = new Mock<IUserClaimsPrincipalFactory<User>>();
+
+            var mockSignInManager = new Mock<SignInManager<User>>(
+                mockUserManager.Object,
+                mockHttpContextAccessor.Object,
+                mockClaimsFactory.Object,
+                null, null, null, null
+            );
+
+            var mockConfiguration = new Mock<Microsoft.Extensions.Configuration.IConfiguration>();
+
+            var authService = new AuthService(
+                mockUserManager.Object,
+                mockSignInManager.Object,
+                mockConfiguration.Object
+            );
+
+            var registerModel = new RegisterModel
+            {
+                Email = "testuser@example.com",
+
+                Password = "Test123!",
+                FirstName = "Test",
+                LastName = "Test",
+                ConfirmPassword = "Test123!"
+            };
+
+            //Act
+            var result = await authService.RegisterUser(registerModel);
+
+            //Assert
+            Assert.False(result);
+        }
+
+        [Fact]
+        public async Task RegisterUser_AddToRolesFails_ReturnsFalse()
+        {
+            //Arrange
+            var mockUserStore = new Mock<IUserStore<User>>();
+            var mockUserManager = new Mock<UserManager<User>>(mockUserStore.Object, null, null, null, null, null, null, null, null);
+
+            mockUserManager.Setup(x => x.NormalizeEmail(It.IsAny<string>()))
+                .Returns((string email) => email.ToUpperInvariant());
+
+            mockUserManager.Setup(x => x.CreateAsync(It.IsAny<User>(), It.IsAny<string>()))
+                .ReturnsAsync(IdentityResult.Success);
+
+            mockUserManager.Setup(x => x.AddToRoleAsync(It.IsAny<User>(), It.IsAny<string>()))
+                .ReturnsAsync(IdentityResult.Failed());
+
+            var mockHttpContextAccessor = new Mock<Microsoft.AspNetCore.Http.IHttpContextAccessor>();
+            var mockClaimsFactory = new Mock<IUserClaimsPrincipalFactory<User>>();
+
+            var mockSignInManager = new Mock<SignInManager<User>>(
+                mockUserManager.Object,
+                mockHttpContextAccessor.Object,
+                mockClaimsFactory.Object,
+                null, null, null, null
+            );
+
+            var mockConfiguration = new Mock<Microsoft.Extensions.Configuration.IConfiguration>();
+
+            var authService = new AuthService(
+                mockUserManager.Object,
+                mockSignInManager.Object,
+                mockConfiguration.Object
+            );
+
+            var registerModel = new RegisterModel
+            {
+                Email = "testuser@example.com",
+
+                Password = "Test123!",
+                FirstName = "Test",
+                LastName = "Test",
+                ConfirmPassword = "Test123!"
+            };
+
+            //Act
+            var result = await authService.RegisterUser(registerModel);
+
+            //Assert
+            Assert.False(result);
+        }
+
+        [Fact]
+        public async Task LoginUser_UserNotFound_ReturnsFailureMessage()
+        { 
+            //Arrange
+            var mockUserStore = new Mock<IUserStore<User>>();
+
+            var mockUserManager = new Mock<UserManager<User>>(mockUserStore.Object, null, null, null, null, null, null, null, null);
+
+            var mockHttpContextAccessor = new Mock<Microsoft.AspNetCore.Http.HttpContextAccessor>();
+            var mockClaimsFactory = new Mock<IUserClaimsPrincipalFactory<User>>();
+
+            var mockSignInManager = new Mock<SignInManager<User>>(
+                mockUserManager.Object,
+                mockHttpContextAccessor.Object,
+                mockClaimsFactory.Object,
+                null, null, null, null
+            );
+
+            var mockConfiguration = new Mock<Microsoft.Extensions.Configuration.IConfiguration>();
+
+            var authService = new AuthService(
+                mockUserManager.Object,
+                mockSignInManager.Object,
+                mockConfiguration.Object
+            );
+
+            var loginModel = new LoginModel
+            {
+                Email = "testuser@example.com",
+                Password = "Test123!"
+            };
+
+            mockUserManager.Setup(x => x.FindByEmailAsync(loginModel.Email))
+                .ReturnsAsync((User)null!);
+
+            //Act
+            var result = await authService.LoginUser(loginModel);
+
+            //Assert
+            Assert.Equal("Login Was NOT Successful", result);
         }
     }
 }

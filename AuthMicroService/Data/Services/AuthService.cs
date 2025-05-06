@@ -36,9 +36,14 @@ namespace AuthMicroService.Data.Services
 
             var result = await _userManager.CreateAsync(user, registerModel.Password);
 
-             if (result.Succeeded)
+            if (result.Succeeded)
             {
-                await _userManager.AddToRoleAsync(user, Roles.Customer);
+                var roleResult = await _userManager.AddToRoleAsync(user, Roles.Customer);
+                if (!roleResult.Succeeded)
+                {
+                    return false;
+                }
+
                 return true;
             }
 
@@ -47,17 +52,23 @@ namespace AuthMicroService.Data.Services
 
         public async Task<string> LoginUser(LoginModel loginModel)
         {
-            var result = await _signInManager.PasswordSignInAsync(loginModel.Email, loginModel.Password, false, false);
+            var user = await _userManager.FindByEmailAsync(loginModel.Email);
 
-            if (result.Succeeded)
+            if (user == null)
             {
-                var user = await _userManager.FindByEmailAsync(loginModel.Email);
-                var role = (await _userManager.GetRolesAsync(user)).FirstOrDefault();
-
-                return GenerateJwtToken(user, role);
+                return "Login Was NOT Successful";
             }
 
-            return "Login Was NOT Successful";
+            var result = await _signInManager.PasswordSignInAsync(loginModel.Email, loginModel.Password, false, false);
+
+            if (!result.Succeeded)
+            {
+                return "Login Was NOT Successful";
+            }
+
+            var role = (await _userManager.GetRolesAsync(user)).FirstOrDefault();
+
+            return GenerateJwtToken(user, role);
         }
 
         public string GenerateJwtToken(User user, string role)
